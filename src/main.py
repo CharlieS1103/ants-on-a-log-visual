@@ -1,38 +1,42 @@
-import pygame as pg
-import random
+"""
+This module simulates ants moving on a log.
+"""
 
+import random
+import sys
+import pygame as pg
 
 # Define global variables & constants
 WIDTH, HEIGHT = 800, 600
 WHITE = (255, 255, 255)
 BROWN = (139, 69, 19)
 BLACK = (0, 0, 0)
-global number_of_ants
-number_of_ants = 100
-global time
-time = 0  # To be incremented in seconds
-global ant_speed
-ant_speed = 1  # Meter per Minute
-global collide
-collide = True  # enable collision between ants
-
-# Making it the same as the classic 1 meter per minute problem
+NUMBER_OF_ANTS = 100
+TIME = 0  # To be incremented in seconds
+ANT_SPEED = 20  # Meter per Minute
 LOG_DISTANCE = WIDTH - 20  # Fixed log distance
+COLLIDE = False  # Collision toggle
 
 
 class Ant(pg.sprite.Sprite):
+    """
+    Class representing an ant.
+    """
     def __init__(self, pos, direction, identifier):
         super().__init__()
         self.image = pg.Surface((20, 20), pg.SRCALPHA)
         self.rect = self.image.get_rect(center=pos)
         self.pos = pg.math.Vector2(pos)
         self.direction = pg.math.Vector2(direction).normalize()
+        self.vel = self.direction * ANT_SPEED / 60
+        # Convert speed to pixels per frame
         self.identifier = identifier
-        self.vel = self.direction * ant_speed / 60
-        # Note the 60 is for frame rate not for units
         self.font = pg.font.Font(None, 24)
 
     def update(self):
+        """
+        Update the ant's position and draw the arrow and identifier.
+        """
         self.pos += self.vel
         self.rect.center = self.pos
         self.image.fill((0, 0, 0, 0))  # Clear the image
@@ -41,6 +45,9 @@ class Ant(pg.sprite.Sprite):
         self.draw_identifier()
 
     def draw_arrow(self):
+        """
+        Draw an arrow indicating the direction of the ant.
+        """
         arrow_length = 10
         arrow_width = 5
         end_pos = (10 + self.direction.x * arrow_length,
@@ -50,20 +57,24 @@ class Ant(pg.sprite.Sprite):
         left_wing = self.direction.rotate(135) * arrow_width
         right_wing = self.direction.rotate(-135) * arrow_width
         pg.draw.line(self.image, WHITE, end_pos,
-                     (end_pos[0] + left_wing.x, end_pos[1] + left_wing.y),
-                     2)
-        pg.draw.line(
-            self.image, WHITE, end_pos,
-            (end_pos[0] + right_wing.x, end_pos[1] + right_wing.y), 2)
+                     (end_pos[0] + left_wing.x, end_pos[1] + left_wing.y), 2)
+        pg.draw.line(self.image, WHITE, end_pos,
+                     (end_pos[0] + right_wing.x, end_pos[1] + right_wing.y), 2)
 
     def draw_identifier(self):
+        """
+        Draw the unique identifier above the ant's head.
+        """
         identifier_surface = self.font.render(str(self.identifier), True,
                                               BLACK)
-        identifier_rect = identifier_surface.get_rect(center=(10, -10))
+        identifier_rect = identifier_surface.get_rect(center=(10, -5))
         self.image.blit(identifier_surface, identifier_rect)
 
 
 class Log(pg.sprite.Sprite):
+    """
+    Class representing the log.
+    """
     def __init__(self, pos):
         super().__init__()
         self.image = pg.Surface((LOG_DISTANCE, 10))
@@ -72,12 +83,11 @@ class Log(pg.sprite.Sprite):
         self.vel = pg.math.Vector2(0, 0)
         self.pos = pg.math.Vector2(pos)
 
-    def update(self):
-        self.pos += self.vel
-        self.rect.center = self.pos
-
 
 def generate_ants(number_of_ants):
+    """
+    Generate a group of ants.
+    """
     ants = pg.sprite.Group()
     for i in range(number_of_ants):
         pos = (random.randint(0, LOG_DISTANCE), (HEIGHT // 2 - 10))
@@ -87,43 +97,53 @@ def generate_ants(number_of_ants):
     return ants
 
 
-# Func is a tad redundant, but it's here for the sake of clarity
 def generate_log():
+    """
+    Generate the log.
+    """
     logs = pg.sprite.Group()
     log = Log((WIDTH // 2, HEIGHT // 2))
     logs.add(log)
     return logs
 
 
-def draw_textboxes(number_of_ants_textbox, ant_speed_textbox):
-    # , collide_button):
+def draw_textboxes(number_of_ants_textbox, ant_speed_textbox, collide_button):
+    """
+    Draw the textboxes and buttons on the screen.
+    """
     start_button_text = pg.font.Font(None, 36).render("Start", True, WHITE)
+    collide_button_text = pg.font.Font(None, 36).render(
+        "Collide: On" if COLLIDE else "Collide: Off", True, WHITE)
     pg.draw.rect(screen, WHITE, number_of_ants_textbox)
     font.render("Number of Ants", True, BLACK)
     pg.draw.rect(screen, WHITE, ant_speed_textbox)
     font.render("Ant Speed", True, BLACK)
-    # pg.draw.rect(screen, WHITE, collide_button)
+    pg.draw.rect(screen, WHITE, collide_button)
     screen.blit(start_button_text, (100, 10))
+    screen.blit(collide_button_text,
+                (collide_button.x + 5, collide_button.y + 5))
 
 
 def on_start_button_click(number_of_ants_text, ant_speed_text):
-    # Update global variables
-    global number_of_ants
-    global ant_speed
+    """
+    Handle the start button click event.
+    """
+    global NUMBER_OF_ANTS
+    global ANT_SPEED
     if number_of_ants_text == 'Number of ants':
         number_of_ants_text = '100'
     if ant_speed_text == 'Ant Speed':
         ant_speed_text = '1'
 
-    number_of_ants = int(number_of_ants_text)
-    ant_speed = int(ant_speed_text) * 13
+    NUMBER_OF_ANTS = int(number_of_ants_text)
+    ANT_SPEED = int(ant_speed_text) * 13
     # 13 as WIDTH - 20 = 780, 780 / 60 = 13
     # im not going to bother with trying to allow flexible windows rn
     # Reset time
-    global time
-    time = 0
+    global TIME
+    TIME = 0
     # Generate ants
-    ants = generate_ants(number_of_ants)
+    ants = generate_ants(NUMBER_OF_ANTS)
     logs = generate_log()
     return ants, logs
 
@@ -135,28 +155,27 @@ if __name__ == "__main__":
     font = pg.font.Font(None, 36)
     number_of_ants_textbox = pg.Rect(300, 10, 140, 32)
     ant_speed_textbox = pg.Rect(300, 50, 140, 32)
+    collide_button = pg.Rect(300, 90, 140, 32)
     number_of_ants_text = 'Number of ants'
     ant_speed_text = 'Ant Speed'
-    # collide_button = pg.Rect(300, 90, 140, 32)
     active_textbox = None
     # Game loop
     start = False
     while not start:
         screen.fill(BLACK)
-        draw_textboxes(number_of_ants_textbox,
-                       ant_speed_textbox)
-        # add this back later collide_button)
+        draw_textboxes(number_of_ants_textbox, ant_speed_textbox,
+                       collide_button)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
-                quit()
+                sys.exit()
             if event.type == pg.MOUSEBUTTONDOWN:
                 if number_of_ants_textbox.collidepoint(event.pos):
                     active_textbox = 'number_of_ants'
                 elif ant_speed_textbox.collidepoint(event.pos):
                     active_textbox = 'ant_speed'
-                # elif collide_button.collidepoint(event.pos):
-                # collide = not collide
+                elif collide_button.collidepoint(event.pos):
+                    COLLIDE = not COLLIDE
                 else:
                     active_textbox = None
                 # Coordinates of start button are 100, 10, 100, 50
@@ -165,18 +184,29 @@ if __name__ == "__main__":
             if event.type == pg.KEYDOWN and active_textbox:
                 if event.key == pg.K_BACKSPACE:
                     if active_textbox == 'number_of_ants':
-                        number_of_ants_text = number_of_ants_text[:-1]
+                        if number_of_ants_text != 'Number of ants':
+                            number_of_ants_text = number_of_ants_text[:-1]
+                        else:
+                            number_of_ants_text = ''
                     elif active_textbox == 'ant_speed':
-                        ant_speed_text = ant_speed_text[:-1]
+                        if ant_speed_text != 'Ant Speed':
+                            ant_speed_text = ant_speed_text[:-1]
+                        else:
+                            ant_speed_text = ''
                 else:
                     if active_textbox == 'number_of_ants':
+                        if number_of_ants_text == 'Number of ants':
+                            number_of_ants_text = ''
                         number_of_ants_text += event.unicode
                     elif active_textbox == 'ant_speed':
+                        if ant_speed_text == 'Ant Speed':
+                            ant_speed_text = ''
                         ant_speed_text += event.unicode
 
         # Render the text
         number_of_ants_surface = font.render(number_of_ants_text, True, BLACK)
         ant_speed_surface = font.render(ant_speed_text, True, BLACK)
+
         screen.blit(number_of_ants_surface,
                     (number_of_ants_textbox.x + 5,
                      number_of_ants_textbox.y + 5))
@@ -184,6 +214,7 @@ if __name__ == "__main__":
             ant_speed_surface,
             (ant_speed_textbox.x + 5, ant_speed_textbox.y + 5)
         )
+
         pg.display.flip()
         clock.tick(60)
 
@@ -201,15 +232,19 @@ if __name__ == "__main__":
 
         ants.update()
         logs.update()
-        # Change to if collide after I implement the collision button
-        if True:
+
+        # Handle collisions if collide is enabled
+        if COLLIDE:
             for ant1 in ants:
                 for ant2 in ants:
+                    # Will this be fast enough, idk how to do this
                     if ant1 != ant2 and ant1.rect.colliderect(ant2.rect):
                         ant1.direction *= -1
-                        ant1.vel = ant1.direction * ant_speed / 60
+                        ant1.vel = ant1.direction * ANT_SPEED / 60
                         ant2.direction *= -1
-                        ant2.vel = ant2.direction * ant_speed / 60
+                        ant2.vel = ant2.direction * ANT_SPEED / 60
+                        print("COLLISION")
+
         # Remove ants that have moved off the log
         for ant in ants:
             if ant.pos.x < 20 or ant.pos.x > LOG_DISTANCE:
@@ -220,9 +255,10 @@ if __name__ == "__main__":
             running = False
             end_ticks = pg.time.get_ticks()
             elapsed_time = (end_ticks - start_ticks) / 1000
-            print(f"All ants have fallen. Time: {elapsed_time:.2f}")
-            time_surface = font.render(
-                f"Time: {elapsed_time:.2f} seconds", True, BLACK)
+            # Convert to seconds
+            print(f"All ants have fallen. Time: {elapsed_time:.2f} seconds")
+            time_surface = font.render(f"Time: {elapsed_time:.2f} seconds",
+                                       True, BLACK)
             screen.blit(time_surface,
                         (WIDTH // 2 - time_surface.get_width() // 2,
                          HEIGHT // 2 - time_surface.get_height() // 2))
@@ -249,3 +285,14 @@ if __name__ == "__main__":
         pg.display.flip()
         clock.tick(60)
     pg.quit()
+    sys.exit()
+
+"""
+TODO:
+- Fix collision detection
+- Fix collision button
+- Display timer while ants are moving
+- Make UI a tad prettier
+- Figure out math for keeping results consistent with slower computers
+- (or just be lazy and cap ants at 100)
+"""
