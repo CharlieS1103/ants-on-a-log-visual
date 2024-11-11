@@ -22,7 +22,7 @@ class Ant(pg.sprite.Sprite):
     """
     Class representing an ant.
     """
-    def __init__(self, pos, direction, identifier):
+    def __init__(self, pos, direction):
         super().__init__()
         self.image = pg.Surface((20, 20), pg.SRCALPHA)
         self.rect = self.image.get_rect(center=pos)
@@ -30,19 +30,17 @@ class Ant(pg.sprite.Sprite):
         self.direction = pg.math.Vector2(direction).normalize()
         self.vel = self.direction * ANT_SPEED / 60
         # Convert speed to pixels per frame
-        self.identifier = identifier
         self.font = pg.font.Font(None, 24)
 
     def update(self):
         """
-        Update the ant's position and draw the arrow and identifier.
+        Update the ant's position and draw the arrow
         """
         self.pos += self.vel
         self.rect.center = self.pos
         self.image.fill((0, 0, 0, 0))  # Clear the image
         pg.draw.circle(self.image, BLACK, (10, 10), 10)
         self.draw_arrow()
-        self.draw_identifier()
 
     def draw_arrow(self):
         """
@@ -53,22 +51,12 @@ class Ant(pg.sprite.Sprite):
         end_pos = (10 + self.direction.x * arrow_length,
                    10 + self.direction.y * arrow_length)
         pg.draw.line(self.image, WHITE, (10, 10), end_pos, 2)
-        # Draw arrowhead
         left_wing = self.direction.rotate(135) * arrow_width
         right_wing = self.direction.rotate(-135) * arrow_width
         pg.draw.line(self.image, WHITE, end_pos,
                      (end_pos[0] + left_wing.x, end_pos[1] + left_wing.y), 2)
         pg.draw.line(self.image, WHITE, end_pos,
                      (end_pos[0] + right_wing.x, end_pos[1] + right_wing.y), 2)
-
-    def draw_identifier(self):
-        """
-        Draw the unique identifier above the ant's head.
-        """
-        identifier_surface = self.font.render(str(self.identifier), True,
-                                              BLACK)
-        identifier_rect = identifier_surface.get_rect(center=(10, -5))
-        self.image.blit(identifier_surface, identifier_rect)
 
 
 class Log(pg.sprite.Sprite):
@@ -92,7 +80,7 @@ def generate_ants(number_of_ants):
     for i in range(number_of_ants):
         pos = (random.randint(0, LOG_DISTANCE), (HEIGHT // 2 - 10))
         direction = (random.choice([-1, 1]), 0)
-        ant = Ant(pos, direction, i + 1)
+        ant = Ant(pos, direction)
         ants.add(ant)
     return ants
 
@@ -130,7 +118,8 @@ def on_start_button_click(number_of_ants_text, ant_speed_text):
     """
     global NUMBER_OF_ANTS
     global ANT_SPEED
-    if number_of_ants_text == 'Number of ants':
+    if (number_of_ants_text == 'Number of ants' or 
+            int(number_of_ants_text) > 100):
         number_of_ants_text = '100'
     if ant_speed_text == 'Ant Speed':
         ant_speed_text = '1'
