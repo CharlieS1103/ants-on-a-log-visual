@@ -50,12 +50,12 @@ class Ant(pg.sprite.Sprite):
         left_wing = self.direction.rotate(135) * arrow_width
         right_wing = self.direction.rotate(-135) * arrow_width
         pg.draw.line(self.image, WHITE, end_pos,
-                     (end_pos[0] + left_wing.x, end_pos[1] + left_wing.y), 
+                     (end_pos[0] + left_wing.x, end_pos[1] + left_wing.y),
                      2)
         pg.draw.line(
             self.image, WHITE, end_pos,
             (end_pos[0] + right_wing.x, end_pos[1] + right_wing.y), 2)
-        
+
     def draw_identifier(self):
         identifier_surface = self.font.render(str(self.identifier), True,
                                               BLACK)
@@ -143,8 +143,8 @@ if __name__ == "__main__":
     start = False
     while not start:
         screen.fill(BLACK)
-        draw_textboxes(number_of_ants_textbox, 
-                       ant_speed_textbox)  
+        draw_textboxes(number_of_ants_textbox,
+                       ant_speed_textbox)
         # add this back later collide_button)
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -173,19 +173,17 @@ if __name__ == "__main__":
                         number_of_ants_text += event.unicode
                     elif active_textbox == 'ant_speed':
                         ant_speed_text += event.unicode
-        
+
         # Render the text
         number_of_ants_surface = font.render(number_of_ants_text, True, BLACK)
         ant_speed_surface = font.render(ant_speed_text, True, BLACK)
-        
-        screen.blit(number_of_ants_surface, 
-                    (number_of_ants_textbox.x + 5, 
+        screen.blit(number_of_ants_surface,
+                    (number_of_ants_textbox.x + 5,
                      number_of_ants_textbox.y + 5))
         screen.blit(
             ant_speed_surface,
             (ant_speed_textbox.x + 5, ant_speed_textbox.y + 5)
         )
-        
         pg.display.flip()
         clock.tick(60)
 
