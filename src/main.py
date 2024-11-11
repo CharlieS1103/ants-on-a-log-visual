@@ -303,8 +303,5 @@ if __name__ == "__main__":
 """
 TODO:
 - Fix collision detection
-- Display timer while ants are moving
 - Make UI a tad prettier
-- Figure out math for keeping results consistent with slower computers
-- (or just be lazy and cap ants at 100)
 """
