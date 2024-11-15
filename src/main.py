@@ -38,6 +38,7 @@ class Ant(pg.sprite.Sprite):
         """
         Update the ant's position and draw the arrow
         """
+        self.vel = self.direction * ANT_SPEED / 60
         self.pos += self.vel
         self.rect.center = self.pos
         self.image.fill((0, 0, 0, 0))  # Clear the image
@@ -77,8 +78,6 @@ class Log(pg.sprite.Sprite):
         self.image = pg.Surface((LOG_DISTANCE, 10))
         self.image.fill(BROWN)
         self.rect = self.image.get_rect(center=pos)
-        self.vel = pg.math.Vector2(0, 0)
-        self.pos = pg.math.Vector2(pos)
 
 
 def generate_ants(number_of_ants):
@@ -110,7 +109,8 @@ def draw_textboxes(number_of_ants_textbox, ant_speed_textbox, collide_button):
     """
     Draw the textboxes and buttons on the screen.
     """
-    start_button_text = pg.font.Font(None, 36).render("Start", True, WHITE)
+    start_button_text = pg.font.Font(None, 36).render("Start", True, BLACK, 
+                                                      WHITE)
     collide_button_text = pg.font.Font(None, 36).render(
         "Collide: On" if COLLIDE else "Collide: Off", True, WHITE)
     pg.draw.rect(screen, WHITE, number_of_ants_textbox)
@@ -124,6 +124,9 @@ def draw_textboxes(number_of_ants_textbox, ant_speed_textbox, collide_button):
 
 
 def draw_timer(time):
+    """
+    Draw the timer on the screen
+    """
     time_surface = font.render(f"Time: {time:.2f} seconds", True, BLACK)
     screen.blit(time_surface,
                 (WIDTH // 2 - time_surface.get_width() // 2,
@@ -155,7 +158,26 @@ def on_start_button_click(number_of_ants_text, ant_speed_text):
     return ants, logs
 
 
+def handle_collisions(ants):
+
+    for ant1 in ants:
+        for ant2 in ants:
+            # Will this be fast enough, idk how to do this
+            toggled_once = False
+            if (ant1 != ant2 and ant1.rect.colliderect(ant2.rect) and
+               toggled_once is False):
+                ant1.set_direction((-ant1.direction.x, 0))
+                ant2.set_direction((-ant2.direction.x, 0))
+                ant1.update()
+                ant2.update()
+                toggled_once = True
+                print("Collision")
+
+
 if __name__ == "__main__":
+    """
+    Runtime Logic
+    """
     pg.init()
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     clock = pg.time.Clock()
@@ -242,21 +264,10 @@ if __name__ == "__main__":
                 running = False
 
         ants.update()
-        logs.update()
         draw_timer((pg.time.get_ticks() - start_ticks)/1000)
         # Handle collisions if collide is enabled
         if COLLIDE:
-            for ant1 in ants:
-                for ant2 in ants:
-                    # Will this be fast enough, idk how to do this
-                    toggled_once = False
-                    if (ant1 != ant2 and ant1.rect.colliderect(ant2.rect) and
-                       toggled_once is False):
-                        # ant1.set_direction((-ant1.direction.x, 0))
-                        # ant2.set_direction((-ant2.direction.x, 0))
-                        # Figure out how to make them turn around!
-                        print("COLLISION")
-                        toggled_once = True
+            handle_collisions(ants)
 
         # Remove ants that have moved off the log
         for ant in ants:
@@ -292,7 +303,6 @@ if __name__ == "__main__":
                         if quit_button.collidepoint(event.pos):
                             pg.quit()
                             quit()
-
         ants.draw(screen)
         logs.draw(screen)
         pg.display.flip()
