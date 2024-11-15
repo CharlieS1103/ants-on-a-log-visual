@@ -109,7 +109,7 @@ def draw_textboxes(number_of_ants_textbox, ant_speed_textbox, collide_button):
     """
     Draw the textboxes and buttons on the screen.
     """
-    start_button_text = pg.font.Font(None, 36).render("Start", True, BLACK, 
+    start_button_text = pg.font.Font(None, 36).render("Start", True, BLACK,
                                                       WHITE)
     collide_button_text = pg.font.Font(None, 36).render(
         "Collide: On" if COLLIDE else "Collide: Off", True, WHITE)
@@ -139,9 +139,12 @@ def on_start_button_click(number_of_ants_text, ant_speed_text):
     """
     global NUMBER_OF_ANTS
     global ANT_SPEED
+    # Limit the amount of ants to x
+    # (using x because I change this variable so often)
+    x = 100
     if (number_of_ants_text == 'Number of ants' or
-            int(number_of_ants_text) > 100):
-        number_of_ants_text = '100'
+            int(number_of_ants_text) > x):
+        number_of_ants_text = 'f{x}'
     if ant_speed_text == 'Ant Speed':
         ant_speed_text = '1'
 
@@ -249,7 +252,7 @@ if __name__ == "__main__":
                     (collide_button.x + 5, collide_button.y + 5))
 
         pg.display.flip()
-        clock.tick(60)
+        clock.tick(30)
 
     # Start
     ants, logs = on_start_button_click(
@@ -291,6 +294,7 @@ if __name__ == "__main__":
             # but for a project like this one, its fine.
             quit_button = pg.Rect(WIDTH // 2 - 50, HEIGHT // 2 + 50, 100, 50)
             quit_text = font.render("Quit", True, BLACK)
+            restart_button = pg.Rect(WIDTH // 2 - 70, HEIGHT // 2 + 50, )
             pg.draw.rect(screen, WHITE, quit_button)
             screen.blit(quit_text, (WIDTH // 2 - 25, HEIGHT // 2 + 60))
             pg.display.flip()
