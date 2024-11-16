@@ -291,14 +291,7 @@ if __name__ == "__main__":
             elapsed_time = (end_ticks - start_ticks) / 1000
             # Convert to seconds
             print(f"All ants have fallen. Time: {elapsed_time:.2f} seconds")
-            time_surface = font.render(f"Time: {elapsed_time:.2f} seconds",
-                                       True, BLACK)
-            screen.blit(time_surface,
-                        (WIDTH // 2 - time_surface.get_width() // 2,
-                         HEIGHT // 2 - time_surface.get_height() // 2))
-            pg.display.flip()
-            # Probably a better way to handle this logic
-            # but for a project like this one, its fine.
+
             quit_button = pg.Rect(WIDTH // 2 - 50, HEIGHT // 2 + 50, 100, 50)
             quit_text = font.render("Quit", True, BLACK)
             pg.draw.rect(screen, WHITE, quit_button)
