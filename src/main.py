@@ -26,7 +26,7 @@ class Ant(pg.sprite.Sprite):
         super().__init__()
         self.image = pg.Surface((20, 20), pg.SRCALPHA)
         self.rect = self.image.get_rect(center=pos)
-        self.collision_rect = pg.Rect(0, 0, 10, 10)
+        self.collision_rect = self.rect
         self.collision_rect.center = self.rect.center
         self.pos = pg.math.Vector2(pos)
         self.direction = pg.math.Vector2(direction).normalize()
@@ -88,7 +88,7 @@ def generate_ants(number_of_ants):
     """
     ants = pg.sprite.Group()
     colors = [BLACK, (150, 150, 150), (200, 200, 200), (100, 100, 100)]
-    positions = [(10, HEIGHT // 2 - 10), (LOG_DISTANCE - 10, HEIGHT // 2 - 10)]
+    positions = [(20, HEIGHT // 2 - 10), (LOG_DISTANCE - 10, HEIGHT // 2 - 10)]
     directions = [(1, 0), (-1, 0)]
     for i in range(2):
         ant = Ant(positions[i], directions[i], random.choice(colors))
@@ -261,7 +261,6 @@ if __name__ == "__main__":
                     (collide_button.x + 5, collide_button.y + 5))
 
         pg.display.flip()
-        clock.tick(30)
 
     # Start
     ants, logs = on_start_button_click(
@@ -312,7 +311,7 @@ if __name__ == "__main__":
         ants.draw(screen)
         logs.draw(screen)
         pg.display.flip()
-        clock.tick(60)
+        clock.tick(30)
     pg.quit()
     sys.exit()
 
