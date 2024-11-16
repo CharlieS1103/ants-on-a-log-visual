@@ -87,21 +87,24 @@ def generate_ants(number_of_ants):
     Generate a group of ants.
     """
     ants = pg.sprite.Group()
-    colors = [BLACK, (150, 150, 150), (200, 200, 200),
-              (100, 100, 100)]
+    colors = [BLACK, (150, 150, 150), (200, 200, 200), (100, 100, 100)]
     positions = [(10, HEIGHT // 2 - 10), (LOG_DISTANCE - 10, HEIGHT // 2 - 10)]
     directions = [(1, 0), (-1, 0)]
-    
     for i in range(2):
         ant = Ant(positions[i], directions[i], random.choice(colors))
         ants.add(ant)
-        # Need to have it be -2 as we manually place 2 ants at the start 
-        # and end of the log for more consistent results
     for i in range(number_of_ants - 2):
-        pos = (random.randint(0, LOG_DISTANCE), (HEIGHT // 2 - 10))
-        direction = (random.choice([-1, 1]), 0)
-        ant = Ant(pos, direction, random.choice(colors))
-        ants.add(ant)
+        while True:
+            pos = (random.randint(0, LOG_DISTANCE), (HEIGHT // 2 - 10))
+            direction = (random.choice([-1, 1]), 0)
+            ant = Ant(pos, direction, random.choice(colors))
+            if not any(
+                ant.rect.colliderect(existing_ant.rect)
+                for existing_ant in ants
+            ):
+                ants.add(ant)
+                break
+
     return ants
 
 
@@ -151,7 +154,7 @@ def on_start_button_click(number_of_ants_text, ant_speed_text):
     global ANT_SPEED
     # Limit the amount of ants to x
     # (using x because I change this variable so often)
-    x = 100
+    x = 20
     if (number_of_ants_text == 'Number of ants' or
             int(number_of_ants_text) > x):
         number_of_ants_text = x
@@ -175,10 +178,10 @@ def handle_collisions(ants):
     for ant1 in ants:
         for ant2 in ants:
             if ant1 != ant2 and ant1.rect.colliderect(ant2.rect):
-
                 ant1.set_direction((-ant1.direction.x, 0))
                 ant2.set_direction((-ant2.direction.x, 0))
                 # Need to not move position so collisions don't speed up
+
                 ant1.update()
                 ant2.update()
 
