@@ -14,7 +14,6 @@ BROWN = (139, 69, 19)
 BLACK = (0, 0, 0)
 NUMBER_OF_ANTS = 100
 TIME = 0  # To be incremented in seconds
-ANT_SPEED = 20  # Meter per Minute
 LOG_DISTANCE = WIDTH - 20  # Fixed log distance
 COLLIDE = False  # Collision toggle
 
@@ -27,20 +26,23 @@ class Ant(pg.sprite.Sprite):
         super().__init__()
         self.image = pg.Surface((20, 20), pg.SRCALPHA)
         self.rect = self.image.get_rect(center=pos)
+        self.collision_rect = pg.Rect(0, 0, 10, 10)
+        self.collision_rect.center = self.rect.center
         self.pos = pg.math.Vector2(pos)
         self.direction = pg.math.Vector2(direction).normalize()
         self.vel = self.direction * ANT_SPEED / 60
-        # Convert speed to pixels per frame
         self.font = pg.font.Font(None, 24)
         self.color = color
 
-    def update(self):
+    def update(self, move_position=True):
         """
         Update the ant's position and draw the arrow
         """
         self.vel = self.direction * ANT_SPEED / 60
-        self.pos += self.vel
+        if move_position:
+            self.pos += self.vel
         self.rect.center = self.pos
+        self.collision_rect.center = self.rect.center
         self.image.fill((0, 0, 0, 0))  # Clear the image
         pg.draw.circle(self.image, self.color, (10, 10), 10)
         self.draw_arrow()
@@ -87,7 +89,15 @@ def generate_ants(number_of_ants):
     ants = pg.sprite.Group()
     colors = [BLACK, (150, 150, 150), (200, 200, 200),
               (100, 100, 100)]
-    for i in range(number_of_ants):
+    positions = [(10, HEIGHT // 2 - 10), (LOG_DISTANCE - 10, HEIGHT // 2 - 10)]
+    directions = [(1, 0), (-1, 0)]
+    
+    for i in range(2):
+        ant = Ant(positions[i], directions[i], random.choice(colors))
+        ants.add(ant)
+        # Need to have it be -2 as we manually place 2 ants at the start 
+        # and end of the log for more consistent results
+    for i in range(number_of_ants - 2):
         pos = (random.randint(0, LOG_DISTANCE), (HEIGHT // 2 - 10))
         direction = (random.choice([-1, 1]), 0)
         ant = Ant(pos, direction, random.choice(colors))
@@ -144,12 +154,12 @@ def on_start_button_click(number_of_ants_text, ant_speed_text):
     x = 100
     if (number_of_ants_text == 'Number of ants' or
             int(number_of_ants_text) > x):
-        number_of_ants_text = 'f{x}'
+        number_of_ants_text = x
     if ant_speed_text == 'Ant Speed':
         ant_speed_text = '1'
 
     NUMBER_OF_ANTS = int(number_of_ants_text)
-    ANT_SPEED = int(ant_speed_text) * 13
+    ANT_SPEED = float(ant_speed_text) * 13
     # 13 as WIDTH - 20 = 780, 780 / 60 = 13
     # im not going to bother with trying to allow flexible windows rn
     # Reset time
@@ -162,19 +172,15 @@ def on_start_button_click(number_of_ants_text, ant_speed_text):
 
 
 def handle_collisions(ants):
-
     for ant1 in ants:
         for ant2 in ants:
-            # Will this be fast enough, idk how to do this
-            toggled_once = False
-            if (ant1 != ant2 and ant1.rect.colliderect(ant2.rect) and
-               toggled_once is False):
+            if ant1 != ant2 and ant1.rect.colliderect(ant2.rect):
+
                 ant1.set_direction((-ant1.direction.x, 0))
                 ant2.set_direction((-ant2.direction.x, 0))
+                # Need to not move position so collisions don't speed up
                 ant1.update()
                 ant2.update()
-                toggled_once = True
-                print("Collision")
 
 
 if __name__ == "__main__":
@@ -267,11 +273,12 @@ if __name__ == "__main__":
                 running = False
 
         ants.update()
-        draw_timer((pg.time.get_ticks() - start_ticks)/1000)
+        elapsed_time = (pg.time.get_ticks() - start_ticks) / 1000
+        draw_timer(elapsed_time)
         # Handle collisions if collide is enabled
         if COLLIDE:
             handle_collisions(ants)
-
+            
         # Remove ants that have moved off the log
         for ant in ants:
             if ant.pos.x < 20 or ant.pos.x > LOG_DISTANCE:
@@ -294,7 +301,6 @@ if __name__ == "__main__":
             # but for a project like this one, its fine.
             quit_button = pg.Rect(WIDTH // 2 - 50, HEIGHT // 2 + 50, 100, 50)
             quit_text = font.render("Quit", True, BLACK)
-            restart_button = pg.Rect(WIDTH // 2 - 70, HEIGHT // 2 + 50, )
             pg.draw.rect(screen, WHITE, quit_button)
             screen.blit(quit_text, (WIDTH // 2 - 25, HEIGHT // 2 + 60))
             pg.display.flip()
