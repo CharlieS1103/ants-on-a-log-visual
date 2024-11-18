@@ -88,7 +88,7 @@ def generate_ants(number_of_ants):
     """
     ants = pg.sprite.Group()
     colors = [BLACK, (150, 150, 150), (200, 200, 200), (100, 100, 100)]
-    positions = [(20, HEIGHT // 2 - 10), (LOG_DISTANCE - 10, HEIGHT // 2 - 10)]
+    positions = [(20, HEIGHT // 2 - 10), (LOG_DISTANCE, HEIGHT // 2 - 10)]
     directions = [(1, 0), (-1, 0)]
     for i in range(2):
         ant = Ant(positions[i], directions[i], random.choice(colors))
@@ -311,7 +311,7 @@ if __name__ == "__main__":
         ants.draw(screen)
         logs.draw(screen)
         pg.display.flip()
-        clock.tick(30)
+        clock.tick(60)
     pg.quit()
     sys.exit()
 
