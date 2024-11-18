@@ -162,8 +162,9 @@ def on_start_button_click(number_of_ants_text, ant_speed_text):
         ant_speed_text = '1'
 
     NUMBER_OF_ANTS = int(number_of_ants_text)
-    ANT_SPEED = float(ant_speed_text) * 13
-    # 13 as WIDTH - 20 = 780, 780 / 60 = 13
+    ANT_SPEED = (float(ant_speed_text) * 13) / 2
+    # 13 as WIDTH - 20 = 780, 780 / 60 = 13 
+    # Divide by 2 as we update the position twice per frame
     # im not going to bother with trying to allow flexible windows rn
     # Reset time
     global TIME
@@ -181,7 +182,6 @@ def handle_collisions(ants):
                 ant1.set_direction((-ant1.direction.x, 0))
                 ant2.set_direction((-ant2.direction.x, 0))
                 # Need to not move position so collisions don't speed up
-
                 ant1.update()
                 ant2.update()
 
@@ -273,14 +273,21 @@ if __name__ == "__main__":
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
-
         ants.update()
         elapsed_time = (pg.time.get_ticks() - start_ticks) / 1000
         draw_timer(elapsed_time)
         # Handle collisions if collide is enabled
         if COLLIDE:
-            handle_collisions(ants)
-            
+            # Update all ants except for the ones that have collided
+            collided_ants = handle_collisions(ants)
+            if collided_ants:
+                for ant in ants:
+                    if ant not in collided_ants:
+                        ant.update()
+        else:
+            for ant in ants:
+                ant.update()
+
         # Remove ants that have moved off the log
         for ant in ants:
             if ant.pos.x < 20 or ant.pos.x > LOG_DISTANCE:
