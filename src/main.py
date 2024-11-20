@@ -105,7 +105,16 @@ def generate_ants(number_of_ants):
                 ants.add(ant)
                 break
 
-    return ants
+    ants_list = list(ants)
+    n = len(ants_list)
+    for i in range(n):
+        for j in range(0, n-i-1):
+            if ants_list[j].rect.x > ants_list[j+1].rect.x:
+                ants_list[j], ants_list[j+1] = ants_list[j+1], ants_list[j]
+
+    sorted_ants_group = pg.sprite.Group(ants_list)
+
+    return sorted_ants_group
 
 
 def generate_log():
@@ -176,14 +185,16 @@ def on_start_button_click(number_of_ants_text, ant_speed_text):
 
 
 def handle_collisions(ants):
-    for ant1 in ants:
-        for ant2 in ants:
-            if ant1 != ant2 and ant1.rect.colliderect(ant2.rect):
-                ant1.set_direction((-ant1.direction.x, 0))
-                ant2.set_direction((-ant2.direction.x, 0))
-                # Need to not move position so collisions don't speed up
-                ant1.update()
-                ant2.update()
+    ants_list = sorted(ants, key=lambda ant: ant.rect.x)
+    for i in range(len(ants_list) - 1):
+        ant1 = ants_list[i]
+        ant2 = ants_list[i + 1]
+        if ant1.rect.colliderect(ant2.rect):
+            ant1.set_direction((-ant1.direction.x, 0))
+            ant2.set_direction((-ant2.direction.x, 0))
+            # Need to not move position so collisions don't speed up
+            ant1.update()
+            ant2.update()
 
 
 if __name__ == "__main__":
