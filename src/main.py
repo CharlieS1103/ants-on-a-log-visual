@@ -133,16 +133,16 @@ def draw_textboxes(number_of_ants_textbox, ant_speed_textbox, collide_button):
     """
     start_button_text = pg.font.Font(None, 36).render("Start", True, BLACK,
                                                       WHITE)
-    collide_button_text = pg.font.Font(None, 36).render(
-        "Collide: On" if COLLIDE else "Collide: Off", True, WHITE)
+    #  collide_button_text = pg.font.Font(None, 36).render(
+    #     "Collide: On" if COLLIDE else "Collide: Off", True, WHITE)
     pg.draw.rect(screen, WHITE, number_of_ants_textbox)
     font.render("Number of Ants", True, BLACK)
     pg.draw.rect(screen, WHITE, ant_speed_textbox)
     font.render("Ant Speed", True, BLACK)
-    pg.draw.rect(screen, WHITE, collide_button)
+    # pg.draw.rect(screen, WHITE, collide_button)
     screen.blit(start_button_text, (100, 10))
-    screen.blit(collide_button_text,
-                (collide_button.x + 5, collide_button.y + 5))
+    #  screen.blit(collide_button_text,
+    #             (collide_button.x + 5, collide_button.y + 5))
 
 
 def draw_timer(time):
@@ -172,7 +172,7 @@ def on_start_button_click(number_of_ants_text, ant_speed_text):
 
     NUMBER_OF_ANTS = int(number_of_ants_text)
     ANT_SPEED = (float(ant_speed_text) * 13) / 2
-    # 13 as WIDTH - 20 = 780, 780 / 60 = 13 
+    # 13 as WIDTH - 20 = 780, 780 / 60 = 13
     # Divide by 2 as we update the position twice per frame
     # im not going to bother with trying to allow flexible windows rn
     # Reset time
